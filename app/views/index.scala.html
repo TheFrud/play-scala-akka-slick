@@ -1,0 +1,11 @@
+@(message: String, persons: List[models.Tables.Person])
+
+@main("Welcome to Play") {
+
+    @helper.form
+
+    @for(p <- persons){
+        <p>@p</p>
+    }
+
+}

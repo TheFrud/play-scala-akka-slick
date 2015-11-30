@@ -1,0 +1,10 @@
+New log file opened at Mon Nov 30 11:37:53 CET 2015 by 13540@FRUD-PC
+Taking next connection to: 2210
+New client attempting to connect on port: 2211-2210
+  Address = /192.168.1.45:2210
+This client on port 2211 has uuid 31ab3972-c29b-4cc4-98ef-e519cead9220 configName play-fork-run humanReadableName Play Fork Run protocolVersion 1 featureTags Vector()
+Connected Clients: play-fork-run-31ab3972-c29b-4cc4-98ef-e519cead9220
+Taking next connection to: 2210
+Checking to see if clients are empty...
+We have 1 non-daemon clients, continuing serving connections.
+Taking next connection to: 2210

@@ -1,0 +1,18 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET         /                     controllers.Application.index
+GET         /android              controllers.Application.android
+# GET       /setupdb              controllers.Application.setupdb
+POST        /createperson         controllers.Application.createPerson
+GET         /getpersons           controllers.Application.getPersons
+GET         /echo-ws              controllers.Application.echoWs
+GET         /android-ws           controllers.Application.androidWs
+
+# Android
+POST        /login                controllers.Application.login
+
+# Map static resources from the /public folder to the /assets URL path
+GET         /assets/*file         controllers.Assets.versioned(path="/public", file: Asset)
