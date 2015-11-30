@@ -54,22 +54,6 @@ class Application extends Controller {
 
   implicit val personFormat = Json.format[Person]
 
-  // ANDROID FORM (for login)
-  val userForm = Form(
-    mapping(
-      "name" -> text,
-      "age" -> number
-    )(PersonForm.apply)(PersonForm.unapply)
-  )
-
-  // JSON SAK
-  implicit val rds = (
-    (__ \ 'name).read[String] and
-      (__ \ 'age).read[Int]
-    ) tupled
-
-  implicit val userFormat = Json.format[Person]
-
   def createPerson = Action(parse.json) {implicit request =>
     /*
     val userData = userForm.bindFromRequest.get
@@ -137,13 +121,6 @@ class Application extends Controller {
   def androidWs = WebSocket.acceptWithActor[String, String]{
     request => out => Props(classOf[AndroidActor], out)
   }
-
-
-
-
-
-
-
 
 
 }
