@@ -1,4 +1,4 @@
-name := """play-scala-akka-slick"""
+name := """school-android"""
 
 version := "1.0-SNAPSHOT"
 

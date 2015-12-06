@@ -1,11 +1,11 @@
-@(message: String, persons: List[models.Tables.Person])
+@(message: String, users: List[models.Tables.User])
 
 @main("Welcome to Play") {
 
     @helper.form
 
-    @for(p <- persons){
-        <p>@p</p>
+    @for(u <- users){
+        <p>@u</p>
     }
 
 }

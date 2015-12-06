@@ -1,6 +1,6 @@
 import javax.inject.Inject
 
-import models.Tables.Persons
+import models.Tables.{Users}
 import play.api.inject.ApplicationLifecycle
 
 import scala.concurrent.Future
@@ -11,7 +11,7 @@ import scala.concurrent.Future
 class ApplicationGlobal@Inject() (lifecycle: ApplicationLifecycle) {
   lifecycle.addStopHook{
     () =>
-      Future.successful(Persons.db.close())
+      Future.successful(Users.db.close())
 
   }
 }

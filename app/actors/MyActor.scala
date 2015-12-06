@@ -23,12 +23,13 @@ class MyActor extends Actor with ActorLogging{
 
     def receive = {
 
-    case Person(None, name, age) =>
-      Persons.create(Person(None, name, age))
+
+    case User(None, name, password) =>
+      Users.create(User(None, name, password))
 
     case GetAll =>
-      val futurePersons: Future[List[models.Tables.Person]] = Persons.getAll
-      futurePersons.map{f => f}
+      val futureUsers: Future[List[models.Tables.User]] = Users.getAll
+      futureUsers.map{f => f}
 
     /*
     case "getall" =>
