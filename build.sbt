@@ -33,4 +33,4 @@ routesGenerator := InjectedRoutesGenerator
   "ch.qos.logback" % "logback-classic" % "1.1.2"
  */
 
-fork in run := true
+fork in run := false
