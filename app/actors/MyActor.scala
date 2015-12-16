@@ -1,6 +1,7 @@
 package actors
 
 import akka.actor.{PoisonPill, ActorLogging, Actor}
+import play.api.libs.json.Json
 import scala.concurrent.{Future, Await}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -23,9 +24,19 @@ class MyActor extends Actor with ActorLogging{
 
     def receive = {
 
-
+    /*
     case User(None, name, password) =>
-      Users.create(User(None, name, password))
+      val user = User(None, name, password)
+      val futureExist = Users.login(user)
+      futureExist.map(v =>
+        v match {
+          case l: List[User] if l.size > 0 =>
+            val user = l.head
+            Ok(Json.obj("status" -> "Success", "userId" -> user.id, "userName" -> user.name, "userPassword" -> user.password))
+
+          case _ => Users.create(User(None, name, password))
+        }
+      */
 
     case GetAll =>
       val futureUsers: Future[List[models.Tables.User]] = Users.getAll
@@ -62,5 +73,7 @@ class MyActor extends Actor with ActorLogging{
     case _ => println("Nothing!")
 
   }
+
+
 
 }

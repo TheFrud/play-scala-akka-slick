@@ -15,7 +15,8 @@ object Tables {
   case class User(id: Option[Long] = None, name: String, password: String)
   case class UserForm(name: String, password: String)
   case class UserIdForm(id: Long)
-  case class SaveProfileForm(id: Long, name: String, password: String)
+  case class SaveProfileForm(id: Long, oldName: String, name: String, password: String)
+  case class UserRegistrationForm(name: String, password: String)
 
   class Users(tag: Tag) extends Table[User] (tag, "USERS") {
     def id = column[Long]("USER_ID", O.PrimaryKey, O.AutoInc)
@@ -62,6 +63,34 @@ object Tables {
       } finally 1
     }
 
+    def checkUserNameExistance(User: User) = {
+      try{
+        val users: Future[List[User]] = getAll
+        val filteredusers: Future[List[User]] = users.map{
+          case l: List[User] => l.filter(u => u.name == User.name && u.id != User.id)
+        }
+        filteredusers.map{
+          case l: List[User] => l
+        }
+
+
+      } finally 1
+    }
+
+    def checkUserNameExistanceOnlyName(User: User) = {
+      try{
+        val users: Future[List[User]] = getAll
+        val filteredusers: Future[List[User]] = users.map{
+          case l: List[User] => l.filter(u => u.name == User.name)
+        }
+        filteredusers.map{
+          case l: List[User] => l
+        }
+
+
+      } finally 1
+    }
+
 /*    def login(User: User) = {
       try{
         val users: Future[List[User]] = getAll
@@ -77,11 +106,15 @@ object Tables {
       } finally 1
     }*/
 
-    def create(User: User) = {
+    def create(User: User){
       try{
         val query = users ++= Seq(User)
         val future = db.run(query)
-        future.foreach(r => println("Inserted rows: " + r))
+        future onSuccess {
+          case something => println(something)
+        }
+
+        // future.foreach(r => println("Inserted rows: " + r))
       }finally 1
 
     }

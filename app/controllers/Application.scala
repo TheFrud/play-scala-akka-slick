@@ -54,20 +54,10 @@ class Application extends Controller {
 
   implicit val UserFormat = Json.format[User]
 
-  // NEW FORM
-  /*
-  SKA IN ETT NYTT FORMULÄR HÄR!!!
-   */
-
-
-
-
-
   def setupdb = Action {
     Users.setupdb
     Ok("DB SETUP!")
   }
-
 
   def login = Action.async(parse.json) {implicit request =>
     println("Trying to login.")
@@ -93,36 +83,68 @@ class Application extends Controller {
     }
   }
 
-  def registerUser = Action(parse.json) {implicit request =>
-
+  def registerUser = Action.async(parse.json) {implicit request =>
     println("Trying to register a user")
-    request.body.validate[(String, String)].map{
-      case (name, password) =>
-        val user = User(None, name, password)
-        println(user)
-        Application.myactor ! user
-        // Ok("Went well.")
-        Ok(Json.obj("status" -> "Success"))
-    }.recoverTotal{
-      e => println("Shit");Ok(Json.obj("status" -> "Failure"))
-    }
 
+    implicit val userRegistration: Reads[UserRegistrationForm] = (
+      (JsPath \ "name").read[String] and
+        (JsPath \ "password").read[String]
+      )(UserRegistrationForm.apply _)
+
+    request.body.validate[UserRegistrationForm] match {
+      case s: JsSuccess[UserRegistrationForm] => {
+        val user = User(None, s.value.name, s.value.password)
+        val futureExist = Users.checkUserNameExistanceOnlyName(user)
+        futureExist.map(result =>
+          result match{
+            case l:List[User] if l.size > 0 =>
+              // Användaren existerade
+              Ok(Json.obj("status" -> "Failure", "msg" -> "Email already exists."))
+            case _ =>
+              // Användaren existerade inte
+              Users.create(user)
+              Ok(Json.obj("status" -> "Success"))
+
+          }
+        )
+
+      }
+      case e: JsError => {
+        println(e)
+        Future {Ok(Json.obj("status" -> "Failure"))}
+      }
+    }
   }
 
+  // NYTT FÖRSÖK DÄR JAG ÄVEN TITTAR SÅ ATT ANVÄNDAREN EJ EXISTERAR REDAN
   def saveProfileSettings = Action.async(parse.json) {implicit request =>
     println("Save Profile Settings Method.")
 
     implicit val profileSettingsRead: Reads[SaveProfileForm] = (
       (JsPath \ "userId").read[Long] and
+        (JsPath \ "oldUserName").read[String] and
         (JsPath \ "newUserName").read[String] and
         (JsPath \ "newUserPassword").read[String]
       )(SaveProfileForm.apply _)
 
     request.body.validate[SaveProfileForm] match {
       case s: JsSuccess[SaveProfileForm] => {
-        println(s.get)
-        Users.updateUser(s.value.id, s.value.name, s.value.password)
-        Future{Ok(Json.obj("status" -> "Success"))}
+
+        val user = User(Some(s.value.id), s.value.name, s.value.password)
+        val doesUserExist = Users.checkUserNameExistance(user)
+        doesUserExist.map(list =>
+          list match {
+            case v: List[User] if v.size < 1 =>
+              println("Validated: User don't exist. Updating DB...")
+              Users.updateUser(s.value.id, s.value.name, s.value.password)
+              Ok(Json.obj("status" -> "Success"))
+
+            case _ => {
+              println("NOT Validated: User already exists.")
+              Ok
+            }
+
+      })
       }
       case e: JsError => {
         println(e)
@@ -130,30 +152,53 @@ class Application extends Controller {
       }
     }
 
-    /*
-    val nameReads: Reads[Long] = (JsPath \ "userId").read[Long]
-    val nameResult: JsResult[Long] = request.body.validate[Long](nameReads)
-    nameResult match {
-      case s: JsSuccess[Long] =>
-        println("Gick bra! Värde: " + s.get)
-        val users = Users.getUserById(s.get)
-        users.map(list =>
-          list match {
-            case v: List[User] if v.size > 0 =>
-              val user = v.head
-              Ok(Json.obj("status" -> "Success", "userId" -> s.get, "userName" -> user.name, "userPassword" -> user.password))
-            case _ => Ok(Json.obj("status" -> "Failure"))
-          })
-
-
-      case e: JsError => println("Gick skit")
-        Future {Ok}
-
-      case _ => Future {Ok}
-    }
-    */
   }
 
+/*
+  def saveProfileSettings = Action.async(parse.json) {implicit request =>
+    println("Save Profile Settings Method.")
+
+    implicit val profileSettingsRead: Reads[SaveProfileForm] = (
+      (JsPath \ "userId").read[Long] and
+        (JsPath \ "oldUserName").read[String] and
+        (JsPath \ "newUserName").read[String] and
+        (JsPath \ "newUserPassword").read[String]
+      )(SaveProfileForm.apply _)
+
+    request.body.validate[SaveProfileForm] match {
+      case s: JsSuccess[SaveProfileForm] => {
+
+        val user = User(None, s.value.name, s.value.password)
+        val doesUserExist = Users.checkUserNameExistance(user)
+        doesUserExist.map(list =>
+          list match {
+            case v: List[User] if v.size < 1=>
+              val user = v.head
+              if(user.name.equals(s.value.oldName)){
+                println("User doesn't exist. Updating...")
+                Users.updateUser(s.value.id, s.value.name, s.value.password)
+                Ok(Json.obj("status" -> "Success"))
+                // Future{Ok(Json.obj("status" -> "Success"))}
+              }
+              Ok
+
+            case _ => {
+              println("User already exist. Shit.")
+              println("Got info => Name = " + s.value.name + ", Password = " + s.value.password + ".")
+              Ok
+            }
+
+
+          })
+      }
+      case e: JsError => {
+        println(e)
+        Future{Ok}
+      }
+    }
+
+  }
+  */
 
 
   def index = Action.async {implicit request =>
@@ -180,7 +225,7 @@ class Application extends Controller {
   def getUsers = Action.async { implicit request =>
     println("Get users function")
     val futureUsers = Users.getAll
-    futureUsers.map {users => Ok(Json.obj("users" -> users))}
+    futureUsers.map {users => Ok(Json.obj("status" -> "Success", "users" -> users))}
   }
 
   def getUser = Action.async(parse.json) { implicit request =>
@@ -206,7 +251,6 @@ class Application extends Controller {
             }
           })
 
-
       case e: JsError => {
         println("Gick skit")
         Future {Ok}
@@ -218,38 +262,6 @@ class Application extends Controller {
       }
     }
   }
-
-
-/*  def getUser = Action.async(parse.json) { implicit request =>
-    println("Get single user function")
-    request.body.validate[(String, String)].map{
-      case (name, password) =>
-        val user = User(None, name, password)
-        println(new Date().getTime() + ": " + user)
-        val futureExist = Users.login(user)
-        futureExist.map(v =>
-          v match {
-            case l: List[User] if l.size > 0 =>
-              val user = l.head
-              Ok(Json.obj("status" -> "Success", "userId" -> user.id, "userName" -> user.name, "userPassword" -> user.password))
-
-            case _ => Ok(Json.obj("status" -> "Failure"))
-          }
-        )
-
-
-    }.recoverTotal{ e =>
-      Future{BadRequest}
-    }
-  }*/
-
-
-  // Websocket
-  /*
-  def echoWs = WebSocket.acceptWithActor[String, String] { request => out =>
-    Props(classOf[EchoActor], out)
-  }
-  */
 
   def echoWs = WebSocket.acceptWithActor[String, JsValue]{
     request => out => Props(classOf[ChatSystemActor], out)

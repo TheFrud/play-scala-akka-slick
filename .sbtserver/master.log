@@ -1,5 +1,5 @@
-New log file opened at Sun Dec 06 15:49:12 CET 2015 by 12572@FRUD-PC
-jvm 12572@FRUD-PC
+New log file opened at Wed Dec 16 21:59:23 CET 2015 by 18284@FRUD-PC
+jvm 18284@FRUD-PC
 jvm vmName=Java HotSpot(TM) 64-Bit Server VM vmVendor=Oracle Corporation vmVersion=25.25-b02
 jvm specName=Java Virtual Machine Specification specVendor=Oracle Corporation specVersion=1.8
 jvm arguments: [-Xms256m, -Xmx1024m, -XX:MetaspaceSize=64m, -XX:MaxMetaspaceSize=256m]
@@ -27,7 +27,7 @@ sorting: ns: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin, sbt.plugins.Jvm
   :: sorted deduced result: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin, sbt.plugins.JvmPlugin, sbt.plugins.JUnitXmlReportPlugin)
 [Loading] Done in H:\Projektfiler\Utveckling\BE\school-android\project, returning: (school-android-build)
 Loading project definition from H:\Projektfiler\Utveckling\BE\school-android\project
-Running task... Cancel: sbt.TaskCancellationStrategy$Null$@2feda996, check cycles: false
+Running task... Cancel: sbt.TaskCancellationStrategy$Null$@291dfdc8, check cycles: false
 
 Initial source changes: 
 	removed:Set()
